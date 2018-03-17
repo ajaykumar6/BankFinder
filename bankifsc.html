@@ -1,0 +1,65 @@
+<html>
+
+<head>
+
+
+    <title>Bank Finder</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+</head>
+
+<body>
+
+    <form>
+        <div class="form-group">
+            <label for="IFSC Code"id="label">IFSC Code</label>
+            <input type="text" class="form-control" id="input_IFSC" aria-describedby="IFSC" placeholder="Enter IFSC Code">
+
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="submitifsc">Submit</button>
+
+        <p id="pid"></p>
+
+        <ul id="details"></ul>
+
+    </form>
+
+
+
+
+    <script type="text/javascript">
+
+
+
+            $('form').submit(function(event)
+            {
+                event.preventDefault();
+                var ifsc = $('#input_IFSC').val();
+                var file = "https://ifsc.razorpay.com/"+ifsc;
+               // alert(file);
+                $.get(file,function(data){
+                   // alert(data);
+                    var str=JSON.stringify(data);
+                    var parsed=JSON.parse(str);
+                   // alert(parsed.BANK);
+                   var detailsstr=""+"<li><b>Name : </b>"+parsed.BANK+"</li>"+"<br>"+"<li><b>Address : </b>"+parsed.ADDRESS+"</li>"+"<br>"+"<li><b>City : </b>"+parsed.CITY+"</li>"+"<br>"+"<li><b>District : </b>"+parsed.DISTRICT+"</li>"+"<br>"+"<li><b>State : </b>"+parsed.STATE+"</li>"
+                  // $("#input_IFSC").style.display("none");
+                   $("#details").html(detailsstr)
+                   document.getElementById("input_IFSC").style.display="none";
+                   document.getElementById("label").style.display="none";
+                   document.getElementById("submitifsc").style.display="none";
+                });
+
+
+            });
+
+        </script>
+
+
+
+</body>
+
+</html>
