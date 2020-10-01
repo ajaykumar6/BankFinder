@@ -1,65 +1,207 @@
-<html>
-
+<html lang="en">
 <head>
+	<meta charset="UTF-8">
+	<title>Thing</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.css">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css">
+	<style>
+	@keyframes spinner {
+		to {transform: rotate(360deg);}
+	}
 
+	.spinner:before {
+		content: '';
+		box-sizing: border-box;
+		margin-bottom: 1%;
+		width: 60px;
+		height: 60px;
+		position: absolute;
+		left: 45%;
+		border-radius: 50%;
+		border: 3px solid transparent;
+		border-top-color: #fff;
+		border-bottom-color: #ff00ff;
+		animation: spinner .8s ease infinite;
+	}
 
-    <title>Bank Finder</title>
+	.invisible {
+		display: none;
+	}
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-
+	.main_table {
+		margin-left: auto; 
+		margin-right: auto; 
+		margin-top: 4%;
+	}
+	.input_field {
+		padding: 7% 7% 1%;
+	}
+</style>
 </head>
-
 <body>
-
-    <form>
-        <div class="form-group">
-            <label for="IFSC Code"id="label">IFSC Code</label>
-            <input type="text" class="form-control" id="input_IFSC" aria-describedby="IFSC" placeholder="Enter IFSC Code">
-
-        </div>
-
-        <button type="submit" class="btn btn-primary" id="submitifsc">Submit</button>
-
-        <p id="pid"></p>
-
-        <ul id="details"></ul>
-
-    </form>
-
-
-
-
-    <script type="text/javascript">
-
-
-
-            $('form').submit(function(event)
-            {
-                event.preventDefault();
-                var ifsc = $('#input_IFSC').val();
-                var file = "https://ifsc.razorpay.com/"+ifsc;
-               // alert(file);
-                $.get(file,function(data){
-                   // alert(data);
-                    var str=JSON.stringify(data);
-                    var parsed=JSON.parse(str);
-                   // alert(parsed.BANK);
-                   var detailsstr=""+"<li><b>Name : </b>"+parsed.BANK+"</li>"+"<br>"+"<li><b>Address : </b>"+parsed.ADDRESS+"</li>"+"<br>"+"<li><b>City : </b>"+parsed.CITY+"</li>"+"<br>"+"<li><b>District : </b>"+parsed.DISTRICT+"</li>"+"<br>"+"<li><b>State : </b>"+parsed.STATE+"</li>"
-                  // $("#input_IFSC").style.display("none");
-                   $("#details").html(detailsstr)
-                   document.getElementById("input_IFSC").style.display="none";
-                   document.getElementById("label").style.display="none";
-                   document.getElementById("submitifsc").style.display="none";
-                });
-
-
-            });
-
-        </script>
-
-
-
+	<section class="hero is-fullheight is-dark is-bold">
+		<div class="hero-head input_field">
+			<h1 class="title">
+				Please enter the ISFC code for the bank.
+			</h1>
+			<h2 class="subtitle" id="main_subtitle">
+				Enter the code in the input below. 
+			</h2>
+			<div class="control level">
+				<input class="input is-large" type="text" style="text-transform: uppercase" placeholder="SBIxxxxxx00" pattern="[A-Z]{4}0\w{6}" maxlength=11 id="main_input" autofocus/>
+				<span id="click_action" class="icon is-medium is-right level-right">
+					<i id="main_icon" class="fa"></i></a>
+				</span>
+			</div>
+		</div>
+		<div class="hero-body">
+			<div id="main_spinner" class="spinner invisible"></div>
+			<table id="response_table" class="table is-hoverable is-striped main_table invisible">
+				<tr>
+					<th>Name</th>
+					<th>:</th>
+					<td id="bank_name"></td>
+				</tr>
+				<tr>
+					<th>Branch</th>
+					<th>:</th>
+					<td id="bank_branch"></td>
+				</tr>
+				<tr>
+					<th>Address</th>
+					<th>:</th>
+					<td id="bank_address"></td>
+				</tr>
+				<tr>
+					<th>District</th>
+					<th>:</th>
+					<td id="bank_district"></td>
+				</tr>
+				<tr>
+					<th>City</th>
+					<th>:</th>
+					<td id="bank_city"></td>
+				</tr>
+				<tr>
+					<th>State</th>
+					<th>:</th>
+					<td id="bank_state"></td>
+				</tr>
+				<tr>
+					<th>IFSC</th>
+					<th>:</th>
+					<td id="bank_IFSC"></td>
+				</tr>
+			</table>
+		</div>
+	</section>
 </body>
+<script>
+	var $scope = {};
+	(function () {
+		var bindIds = ["main_input", "main_icon", "main_subtitle","bank_name","bank_address","bank_district","bank_city","bank_state","bank_IFSC"];
+		var attachEvent = function (idNames) {
+			idNames.forEach(function (idName) {
+				var element = document.getElementById(idName);
+				let sub = document.getElementById("main_subtitle");
+				let icon = document.getElementById("main_icon");
+				element.onkeyup = function (e) {
+					if (e.keyCode!==13){
+						element.value = this.value.toUpperCase();
+						let pattern = new RegExp(element.pattern);
+						if(pattern.test(element.value)) {    
+							element.classList.add("is-success");
+							element.classList.remove("is-danger");
+							sub.classList.remove("has-text-danger");
+							sub.innerHTML = "Click on the checkmark to submit.";
+							icon.classList.add("fa-check");
+							icon.classList.remove("fa-exclamation-triangle");
+						}
+						else {
+							element.classList.add("is-danger");
+							element.classList.remove("is-success");
+							sub.classList.add("has-text-danger");
+							sub.innerHTML = "Please enter a valid ISFC code!";
+							icon.classList.add("fa-exclamation-triangle");
+							icon.classList.remove("fa-check");
+						}
+					}
+				}
 
+				Object.defineProperty($scope, idName, {
+					set: function (newValue) {
+						element.value = newValue.toUpperCase();
+					}
+				});
+			});
+		};
+		attachEvent(bindIds);
+	})();
+
+	async function getIFSCDetails (input_ifsc_code) {
+		let response = await fetch('https://ifsc.razorpay.com/'+input_ifsc_code);
+		let data = await response.json();
+		return data;
+	}
+
+	let fill_bank_details = function (){
+		let spinner = document.getElementById("main_spinner");
+		var element = document.getElementById("main_input");
+		let sub = document.getElementById("main_subtitle");
+		let pattern = new RegExp(element.pattern);
+		let table = document.getElementById("response_table");
+		if(pattern.test(element.value)) {
+			spinner.classList.remove("invisible");
+			if (element.value !== document.getElementById("bank_IFSC").innerHTML){
+				table.classList.add("invisible");
+				getIFSCDetails(element.value).then(response => {
+					if(response === "Not Found") {
+						sub.innerHTML = "Requested ISFC code is invalid!";
+						sub.classList.add("has-text-danger");
+						table.classList.add("invisible");
+						element.classList.add("is-danger");
+						element.classList.remove("is-success");
+						spinner.classList.add("invisible");
+						document.getElementById("bank_name").innerHTML = "";
+						document.getElementById("bank_branch").innerHTML = "";
+						document.getElementById("bank_address").innerHTML = "";
+						document.getElementById("bank_district").innerHTML = "";
+						document.getElementById("bank_city").innerHTML = "";
+						document.getElementById("bank_state").innerHTML = "";
+						document.getElementById("bank_IFSC").innerHTML = "";
+					}
+					else {
+						element.classList.add("is-success");
+						element.classList.remove("is-danger");
+						sub.classList.remove("has-text-danger");
+						document.getElementById("bank_name").innerHTML = response.BANK;
+						document.getElementById("bank_branch").innerHTML = response.BRANCH.replace(/[^\x00-\x7F]/g, "");
+						document.getElementById("bank_address").innerHTML = response.ADDRESS.replace(/[^\x00-\x7F]/g, "");
+						document.getElementById("bank_district").innerHTML = response.DISTRICT;
+						document.getElementById("bank_city").innerHTML = response.CITY;
+						document.getElementById("bank_state").innerHTML = response.STATE;
+						document.getElementById("bank_IFSC").innerHTML = response.IFSC;
+						table.classList.remove("invisible");
+						spinner.classList.add("invisible");
+					}
+				})
+				.catch(err => {
+					console.log("Something went wrong, " + err);
+				});
+			}
+			else{
+				spinner.classList.add("invisible");
+			}
+		}
+	}
+	let span_element = document.getElementById("click_action");
+	span_element.addEventListener("click",fill_bank_details);
+	function keyDownTextField(e) {
+		var keyCode = e.keyCode;
+		if(keyCode==13) {
+			fill_bank_details();
+		} 
+	}
+	document.addEventListener("keydown", keyDownTextField, false);
+</script> 
 </html>
